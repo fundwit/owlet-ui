@@ -1,0 +1,24 @@
+{
+  "name": "owlet",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^0.2.7",
+    "axios": "^0.24.0",
+    "element-plus": "^1.2.0-beta.6",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "vue": "^3.2.16",
+    "vue-router": "^4.0.12",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^1.9.3",
+    "vite": "^2.6.4",
+    "vite-babel-plugin": "0.0.2"
+  }
+}
