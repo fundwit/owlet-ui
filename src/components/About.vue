@@ -1,5 +1,5 @@
 <template>
-  <div>About</div>
+  <div style="margin-top: 2rem">About</div>
 </template>
 
 <script setup>

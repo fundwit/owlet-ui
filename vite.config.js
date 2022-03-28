@@ -15,6 +15,11 @@ export default defineConfig({
         target: "https://owlet-core.fundwit.com/",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
+      },
+      '/assets/libs': {
+        target: "https://owlet.fundwit.com/static/",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/assets\/libs/, '')
       }
     }
   }

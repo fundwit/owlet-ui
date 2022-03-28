@@ -1,7 +1,5 @@
 <template>
-  <div>
-    Home
-  </div>
+  <div style="margin-top: 2rem">Home</div>
 </template>
 
 <script setup>

@@ -1,13 +1,14 @@
 <template>
-  <div style="margin:0 10%">
-    <!-- <el-icon><search/> </el-icon> -->
-
-      <el-input v-model="searchKeyword" size="small" style="margin: 1em 0; width: 300px" placeholder="Please input" @change="onSearchBlur">
-        <template #append>
-          <el-button :icon="Search" />
-        </template>
-      </el-input>
-
+  <div v-if="creating">
+    <article-new @cancel-edit="creating=false"/>
+  </div>
+  <div v-else style="margin:0 auto; margin-top: 2rem; max-width: 900px;">
+    <el-button size="mini" style="margin-right: 5px" type="success" @click="creating=true">+New</el-button>
+    <el-input v-model="query.searchKeyword" size="small" style="margin: 1em 0; width: 300px" placeholder="Please input" @change="onSearchBlur">
+      <template #append>
+        <el-button :icon="Search" />
+      </template>
+    </el-input>
 
     <article-meta v-for="articleMeta in articleCollection" :article-meta="articleMeta" v-bind:key="articleMeta.id"/>
 
@@ -21,12 +22,15 @@
       </el-button-group>
     </div>
   </div>
+
 </template>
 
 <script setup>
 import {  CirclePlus } from '@element-plus/icons-vue'
 import { Search,ArrowLeft, } from '@element-plus/icons-vue'
 import ArticleMeta from './ArticleMeta.vue'
+import ArticleNew from './ArticleNew.vue'
+import { ElNotification } from 'element-plus'
 </script>
 
 
@@ -39,9 +43,12 @@ export default {
   },
   data () {
     return {
-      searchKeyword: "",
+      query: {
+        searchKeyword: null,
+      },
       currentPage: 1,
-      articleCollection: null
+      articleCollection: null,
+      creating: false
     }
   },
   mounted () {
@@ -62,11 +69,11 @@ export default {
         page = 1
       }
       const mask = this.$loading({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
-      articleStore.queryArticles(this.searchKeyword, page).then((resp) => {
+      articleStore.queryArticles(this.query.searchKeyword, page).then((resp) => {
         this.articleCollection = resp
         this.currentPage = page
       }).catch((error) => {
-        this.$notify.error({ title: 'Error', message: 'failed to load data: ' + error })
+        ElNotification({ message: 'failed to load data: ' + error, type: 'error', showClose: true})
       }).finally(() => {
         mask.close()
       })

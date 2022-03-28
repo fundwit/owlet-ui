@@ -15,18 +15,18 @@
         <el-link :href="'/articles/'+articleMeta.id">{{articleMeta.title}}</el-link>
         <el-link :href="'https://owlet.fundwit.com/article/'+articleMeta.id" target="_blank"> [View]</el-link>
       </div>
-      <div>
+      <div class="flex-row">
         <span :class="'property source source-'+articleMeta.source">{{articleSource.title}}</span>
 
-        <span class="property"> <el-icon><MagicStick /></el-icon> {{articleMeta.create_time}}</span>
-        <span class="property"> <el-icon><edit-pen /></el-icon> {{articleMeta.modify_time}}</span>
+        <span class="property icon-label"> <el-icon><MagicStick /></el-icon> {{articleMeta.create_time}}</span>
+        <span class="property icon-label"> <el-icon><edit-pen /></el-icon> {{articleMeta.modify_time}}</span>
 
-        <span class="property">分类: {{articleType.title}}</span>
-        <span class="property">状态: {{articleState.title}}</span>
+        <span class="property icon-label">分类: {{articleType.title}}</span>
+        <span class="property icon-label">状态: {{articleState.title}}</span>
 
-        <span class="property"><el-icon><View /></el-icon> {{articleMeta.view_num}}</span>
-        <span class="property"><el-icon><chat-line-square /></el-icon> {{articleMeta.comment_num}}</span>
-        <span class="property">
+        <span class="property icon-label"><el-icon><View /></el-icon> {{articleMeta.view_num}}</span>
+        <span class="property icon-label"><el-icon><chat-line-square /></el-icon> {{articleMeta.comment_num}}</span>
+        <span class="property icon-label">
           <el-icon><collection-tag /></el-icon>
           <span style="margin-right:0.5em" v-for="tag in articleMeta.tags" v-bind:key="tag.id">{{tag.name}}</span>
         </span>
@@ -132,7 +132,6 @@ export default {
 }
 
 .property {
-  display: inline-block;
   margin: 0.2em 0.5em;
 }
 .article-status-0 {
