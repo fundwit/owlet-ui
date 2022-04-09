@@ -97,11 +97,11 @@ export default {
       const vue = this
       this.editor = editormd("editormd-editor", {
         //width   : "100%",
-        height  : "600px", // calculate height
+        autoHeight: true,
+        // height  : "700px", // calculate height
         //syncScrolling : "single",
         path    : "/assets/libs/editor.md/lib/",
         markdown : this.article.content,
-        //autoHeight: true,
         htmlDecode : "style,script,iframe|on*",
         delay                : 600,
         codeFold             : true,
@@ -241,6 +241,13 @@ export default {
   background-color: white;
   min-height: 400px;
   margin-top: 0;
+}
+
+.markdown-body{
+  min-height: 700px;
+}
+.CodeMirror, .CodeMirror-gutters, .CodeMirror-sizer {
+  min-height: 665px !important;
 }
 
 ul.editormd-menu {
