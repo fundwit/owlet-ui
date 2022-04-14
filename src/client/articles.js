@@ -69,6 +69,13 @@ export class OwletClient {
   async deleteArticle (id) {
     return axios.delete(this.withPath('/v1/articles/' + id), {})
   }
+
+  async deleteTagAssign (resId, tagId) {
+    return axios.delete(this.withPath(`/v1/tag-assigns?resId=${resId}&tagId=${tagId}`), {})
+  }
+  async createTagAssign (resId, tagName) {
+    return axios.post(this.withPath(`/v1/tag-assigns`), {resId: resId, tagName: tagName})
+  }
 }
 
 export const articleStore = new OwletClient('/api')

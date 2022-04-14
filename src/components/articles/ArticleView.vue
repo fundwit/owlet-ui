@@ -1,5 +1,5 @@
 <template>
-  <div v-if="article">
+  <div v-if="article" id="background">
     <div id="article-actions" class="flex-row flex-h-center flex-v-top">
       <div id="article-actions-box">
         <el-button type="success" :icon="Edit" circle @click="onEnterEdit"/>
@@ -8,35 +8,49 @@
       </div>
     </div>
 
-    <div id="background" class="flex-row flex-h-center flex-v-top">
+    <div id="container" class="flex-row flex-h-center flex-v-top">
       <div id="article-main">
-        <div class="flex-row flex-h-right" style="flex-wrap: wrap; position:absolute; z-index:0; width: 600px; top:2rem; right:2rem; opacity: 0.08;">
+        <div id="tag-images" class="flex-row flex-h-right">
           <span v-for="tag in article.tags" v-bind:key="tag.id">
-            <img v-if="tag.image"  height="300" :src="'https://owlet.fundwit.com/assets/tag_icons/'+tag.image"/>
+            <img class="tag-image-box" v-if="tag.image" :src="'https://owlet.fundwit.com/assets/tag_icons/'+tag.image"/>
           </span>
         </div>
-
         <div id="header" class="title">
           <span v-if="!article.status">[稿]</span>
           <span v-if="article.is_top">[顶]</span>
           {{article.title}}
         </div>
-        <div id="meta" class="flex-row">
-          <span :class="'property source source-'+article.source">{{articleSource.title}}</span>
 
-          <span class="property icon-label"> <el-icon><MagicStick /></el-icon> {{article.create_time}}</span>
-          <span class="property icon-label"> <el-icon><edit-pen /></el-icon> {{article.modify_time}}</span>
+        <div id="tags">
+          <el-tag v-for="tag in article.tags" :key="tag.id" size="mini" closable :disable-transitions="false" @close="handleDeleteTagAssign(tag)">
+            {{ tag.name }}
+          </el-tag>
 
-          <span class="property icon-label">分类: {{articleType.title}}</span>
-          <span class="property icon-label">状态: {{articleState.title}}</span>
-
-          <span class="property icon-label"><el-icon><View /></el-icon> {{article.view_num}}</span>
-          <span class="property icon-label"><el-icon><chat-line-square /></el-icon> {{article.comment_num}}</span>
-          <span class="property icon-label">
-            <el-icon><collection-tag /></el-icon>
-            <span style="margin-right:0.5em" v-for="tag in article.tags" v-bind:key="tag.id"> {{tag.name}}</span>
-          </span>
+          <el-input v-if="inputVisible" size="small" style="width: 100px; margin-left: 5px;" ref="InputRef" v-model="updateForm.inputValue"
+            @keyup.enter="handleCreateTagAssign" @blur="handleCreateTagAssign"/>
+          <el-button v-else size="mini" @click="showInput">+ New Tag</el-button>
         </div>
+
+        <div id="meta">
+          <div class="flex-row">
+            <span :class="'property source source-'+article.source">{{articleSource.title}}</span>
+
+            <span class="property icon-label"> <el-icon><MagicStick /></el-icon> {{article.create_time}}</span>
+            <span class="property icon-label"> <el-icon><edit-pen /></el-icon> {{article.modify_time}}</span>
+
+            <span class="property icon-label">分类: {{articleType.title}}</span>
+            <span class="property icon-label">状态: {{articleState.title}}</span>
+
+            <span class="property icon-label"><el-icon><View /></el-icon> {{article.view_num}}</span>
+            <span class="property icon-label"><el-icon><chat-line-square /></el-icon> {{article.comment_num}}</span>
+
+            <span class="property icon-label">
+              <el-icon><collection-tag /></el-icon>
+              <span style="margin-right:0.5em" v-for="tag in article.tags" v-bind:key="tag.id"> {{tag.name}}</span>
+            </span>
+          </div>
+        </div>
+
         <div id="content">
           <div id="editormd-view" class="markdown-body editormd-html-preview editormd-preview-container">
             <textarea id="editormd" v-model="article.content"></textarea>
@@ -66,8 +80,10 @@
 </template>
 
 <script setup>
-import { Close, Expand, Edit, Delete } from '@element-plus/icons-vue'
-import { ElNotification, ElMessageBox } from 'element-plus'
+import { nextTick, ref } from 'vue'
+
+import { Close, Expand, Edit, Delete, Search, CollectionTag } from '@element-plus/icons-vue'
+import { ElInput, ElNotification, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 
@@ -76,9 +92,9 @@ const redirectToArticleList = function (id) {
 }
 </script>
 
-
 <script>
 import { articleStore, articleSources, articleStates, articleTypes } from '../../client/articles'
+import _ from 'lodash'
 
 export default {
   name: 'ArticleView',
@@ -89,7 +105,12 @@ export default {
       articleId: null,
       article: null,
       editor: null,
-      showOutline: true
+      showOutline: true,
+
+      updateForm: {
+        inputValue: "",
+      },
+      inputVisible: false,
     }
   },
   computed: {
@@ -127,6 +148,46 @@ export default {
     }
   },
   methods: {
+    showInput () {
+      this.inputVisible = true
+      nextTick(() => {
+        this.$refs.InputRef.focus()
+      })
+    },
+    handleDeleteTagAssign(tag) {
+      const mask = this.$loading({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
+      articleStore.deleteTagAssign(this.article.id, tag.id).then((data) => {
+        this.article.tags = _.filter(this.article.tags, d => d.id != tag.id)
+        ElNotification({ message: '更新成功', type: 'success', showClose: true})
+      }).catch((error) => {
+        ElNotification({ message: 'failed to load data: ' + error, type: 'error', showClose: true})
+      }).finally(() => {
+        mask.close()
+      })
+    },
+    handleCreateTagAssign() {
+      const val = this.updateForm.inputValue.trim()
+      if (val) {
+        const mask = this.$loading({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
+        articleStore.createTagAssign(this.article.id, val).then((resp) => {
+          if (!this.article.tags) {
+            this.article.tags = []
+          }
+          const data = resp.data
+          this.article.tags.push({id: data.tagId, name: data.tagName, note: data.tagNote, image: data.tagImage})
+          this.inputVisible = false
+          this.updateForm.inputValue = ''
+          ElNotification({ message: '更新成功', type: 'success', showClose: true})
+        }).catch((error) => {
+          ElNotification({ message: 'failed to load data: ' + error, type: 'error', showClose: true})
+        }).finally(() => {
+          mask.close()
+        })
+      } else {
+        this.inputVisible = false
+        this.updateForm.inputValue = ''
+      }
+    },
     initEditor() {
         this.editor = editormd.markdownToHTML("editormd-view", {
           markdown        : this.article.content, //$("#editormd").text() ,//+ "\r\n" + $("#append-test").text(),
@@ -225,7 +286,7 @@ export default {
   padding: 2px 1rem;
 }
 
-#background {
+#container {
   padding-top: 0.5rem;
   padding-bottom: 1rem;
 }
@@ -233,8 +294,10 @@ export default {
 #article-main {
   max-width: 900px;
   border: 1px solid rgb(226, 225, 225);
+  background-color: white;
   position: relative;
   flex-shrink: 1;
+  position:relative;
 }
 
 #article-extension{
@@ -259,15 +322,45 @@ export default {
   border-bottom-width: 1px;
 }
 
+#tag-images{
+  pointer-events: none;
+  position: absolute;
+  flex-wrap: wrap;
+  width: 350px;
+  top: 3rem;
+  right: 0rem;
+}
+.tag-image-box {
+  pointer-events: none;
+  opacity: 0.1;
+  width: 350px;
+}
+
 #header {
-  padding: 4rem 4rem 2rem 4rem;
-  background-color: white;
+  padding: 4rem 4rem 1rem 4rem;
   font-size: 2em;
+}
+
+#tags {
+  padding: 0.2rem 4rem;
+}
+
+#tags .el-tag {
+  margin-left: 5px;
+}
+#tags button {
+  min-height: 1.2rem;
+  padding: 0.2rem 0.5rem;
+  margin-left: 5px;
+}
+#tags .el-input input {
+  height: 20px !important;
+  line-height: 20px !important;
+  margin-left: 5px;
 }
 
 #content {
   padding: 2rem 4rem;
-  background-color: white;
   min-height: 400px;
 }
 
@@ -298,7 +391,7 @@ export default {
   background-color: rgb(0, 102, 255);
 }
 .source-3 {
-  background-color: rgb(196, 151, 5);
+  background-color: rgb(196, 151, px);
 }
 .source-4 {
   background-color: rgb(192, 95, 3);
