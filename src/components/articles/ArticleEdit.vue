@@ -1,9 +1,8 @@
 <template>
   <div v-if="data.article">
     <form id="edit-form">
-      <div id="background" class="flex-row flex-h-center flex-v-top">
+      <div id="background" style="margin: 0 3rem;" class="flex-row flex-h-center flex-v-top">
         <span v-if="data.article.is_top">[顶]</span>
-
         <div class="title">
           <el-input name="title" size="mini" style="width: 600px;" v-model="data.article.title" placeholder="Please input title" />
         </div>

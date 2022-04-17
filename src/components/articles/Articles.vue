@@ -2,7 +2,7 @@
   <div v-if="creating">
     <article-new @cancel-edit="creating=false"/>
   </div>
-  <div v-else style="margin:0 auto; margin-top: 2rem; max-width: 900px;">
+  <div v-else style="margin:0 auto; max-width: 900px;">
     <el-button size="mini" style="margin-right: 5px" type="success" @click="creating=true">+New</el-button>
     <el-input v-model="query.searchKeyword" size="small" style="margin: 1em 0; width: 300px" placeholder="Please input" @change="onSearchBlur">
       <template #append>
