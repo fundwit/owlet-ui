@@ -26,85 +26,66 @@
 
       <div>
         <div id="content">
-            <div id="editormd-editor" class="markdown-body">
-              <textarea id="editormd" v-model="article.content"></textarea>
-            </div>
+          <div id="editormd-editor" class="markdown-body">
+            <textarea id="editormd" v-model="article.content"></textarea>
           </div>
+        </div>
       </div>
     </form>
   </div>
 </template>
 
-<script setup>
+<script>
 import { Close, Expand } from '@element-plus/icons-vue'
+import { articleStore, articleSources, articleStates, articleTypes } from '../../client/articles'
+import { ElNotification, ElLoading } from 'element-plus'
+import { defineComponent, computed, onMounted, reactive, ref} from 'vue'
 import { ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
-const router = useRouter()
-
-const redirectToDetail = function (id) {
-  router.push({ name: 'article-detail', params: {id: id} })
-}
-</script>
-
-
-<script>
-import { articleStore, articleSources, articleStates, articleTypes } from '../../client/articles'
-import { ElNotification } from 'element-plus'
 
 export default {
-  name: 'ArticleNew',
-  components: {
-  },
-  data () {
-    return {
-      article: {
-        title: "",
-        content: "",
-        source: 3,
-        status: 0,
-        type: 2
-      },
-      editor: null
-    }
-  },
-  computed: {
-    articleState () {
-      let state = articleStates[this.article.status]
+  setup(props, ctx) {
+    const router = useRouter()
+
+    const article = reactive({
+      title: "",
+      content: "",
+      source: 3,
+      status: 0,
+      type: 2
+    })
+    let editor = null
+
+    const articleState = computed(()=>{
+      let state = articleStates[article.status]
       if (!state) {
-        state = {title: this.article.status}
+        state = {title: article.status}
       }
       return state
-    },
-    articleType () {
-      let type = articleTypes[this.article.type]
+    })
+    const articleType = computed(()=>{
+      let type = articleTypes[article.type]
       if (!type) {
-        type = {title: this.article.type}
+        type = {title: article.type}
       }
       return type
-    },
-    articleSource () {
-      let source = articleSources[this.article.source]
+    })
+    const articleSource = computed(()=>{
+      let source = articleSources[article.source]
       if (!source) {
-        source = {title: this.article.source}
+        source = {title: article.source}
       }
       return source
-    }
-  },
-  mounted () {
-    if (this.article && !this.editor) {
-      this.initEditor()
-    }
-  },
-  methods: {
-    initEditor() {
-      const vue = this
-      this.editor = editormd("editormd-editor", {
+    })
+
+    const initEditor = ()=> {
+      editor = editormd("editormd-editor", {
         //width   : "100%",
         autoHeight: true,
         // height  : "700px", // calculate height
         //syncScrolling : "single",
         path    : "/assets/libs/editor.md/lib/",
-        markdown : this.article.content,
+        markdown : article.content,
         htmlDecode : "style,script,iframe|on*",
         delay                : 1000,
         codeFold             : true,
@@ -133,18 +114,18 @@ export default {
                               {name:'type', value:'0'},
                             ]
       })
-    },
+    }
 
-    saveArticle() {
-      const content = this.editor.getMarkdown()
+    const saveArticle = () => {
+      const content = editor.getMarkdown()
       if (content.trim().length == 0) {
         ElNotification({ message: '内容不能为空', type: 'warning', showClose: true})
         return
       }
 
-      const creation = {title: this.article.title, content: content, type: this.article.type,
-        source: this.article.source, status: this.article.status}
-      const mask = this.$loading({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
+      const creation = {title: article.title, content: content, type: article.type,
+        source: article.source, status: article.status}
+      const loading = ElLoading.service({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
       let id = 0
       articleStore.createArticle(creation).then((data) => {
         ElNotification({ message: '更新成功', type: 'success', showClose: true})
@@ -152,26 +133,48 @@ export default {
       }).catch((error) => {
         ElNotification({ message: 'failed to load data: ' + error, type: 'error', showClose: true})
       }).finally(() => {
-        mask.close()
+        loading.close()
         if (id > 0) {
-            this.redirectToDetail(id)
+            redirectToDetail(id)
         }
       })
-    },
-    onCancelEdit() {
-      const content = this.editor.getMarkdown()
-      if (content != "" || this.article.title != "") {
+    }
+
+    const onCancelEdit = () => {
+      const content = editor.getMarkdown()
+      if (content != "" || article.title != "") {
         ElMessageBox.confirm('内容未保存，确认退出?', 'Warning',{
             confirmButtonText: 'OK',
             cancelButtonText: 'Cancel',
             type: 'warning',
         }).then(() => {
-          this.$emit('cancel-edit', null)
+          ctx.emit('cancel-edit', null)
         }).catch(() => {
         })
       } else {
-        this.$emit('cancel-edit', null)
+        ctx.emit('cancel-edit', null)
       }
+    }
+    const redirectToDetail = function (id) {
+      router.push({ name: 'article-detail', params: {id: id} })
+    }
+
+    onMounted(()=>{
+      if (article) {
+        initEditor()
+      }
+    })
+
+    return {
+      article,
+      articleStates,
+      articleTypes,
+      articleSources,
+      articleState,
+      articleType,
+      articleSource,
+      saveArticle,
+      onCancelEdit
     }
   }
 }

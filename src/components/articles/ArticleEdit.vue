@@ -1,20 +1,20 @@
 <template>
-  <div v-if="article">
+  <div v-if="data.article">
     <form id="edit-form">
       <div id="background" class="flex-row flex-h-center flex-v-top">
-        <span v-if="article.is_top">[顶]</span>
+        <span v-if="data.article.is_top">[顶]</span>
 
         <div class="title">
-          <el-input name="title" size="mini" style="width: 600px;" v-model="article.title" placeholder="Please input title" />
+          <el-input name="title" size="mini" style="width: 600px;" v-model="data.article.title" placeholder="Please input title" />
         </div>
         <div>
-          <el-select name="source" v-model="article.source" size="mini" style="width: 100px;">
+          <el-select name="source" v-model="data.article.source" size="mini" style="width: 100px;">
             <el-option v-for="(source,id) in articleSources" :key="id" :label="source.title" :value="source.value"/>
           </el-select>
-          <el-select name="type" v-model="article.type" size="mini" style="width: 100px;">
+          <el-select name="type" v-model="data.article.type" size="mini" style="width: 100px;">
             <el-option v-for="(type,id) in articleTypes" :key="id" :label="type.title" :value="type.value"/>
           </el-select>
-          <el-select name="status" v-model="article.status" size="mini" style="width: 100px;">
+          <el-select name="status" v-model="data.article.status" size="mini" style="width: 100px;">
             <el-option v-for="(state,id) in articleStates" :key="id" :label="state.title" :value="state.value"/>
           </el-select>
 
@@ -25,7 +25,7 @@
       <div>
         <div id="content">
             <div id="editormd-editor" class="markdown-body">
-              <textarea id="editormd" v-model="article.content"></textarea>
+              <textarea id="editormd" v-model="data.article.content"></textarea>
             </div>
           </div>
       </div>
@@ -36,72 +36,58 @@
   </div>
 </template>
 
-<script setup>
-import { Close, Expand } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
-</script>
-
-
 <script>
+import { Close, Expand, Edit, Delete, Search, CollectionTag } from '@element-plus/icons-vue'
+import { ElInput, ElLoading, ElNotification, ElMessageBox } from 'element-plus'
 import { articleStore, articleSources, articleStates, articleTypes } from '../../client/articles'
-import { ElNotification } from 'element-plus'
+import { nextTick, reactive, ref, computed, onMounted, onUpdated } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import hash from 'object-hash'
-
+import _ from 'lodash'
 
 export default {
-  name: 'ArticleEdit',
-  components: {
-  },
-  data () {
-    return {
-      articleId: null,
-      article: null,
-      originContentHash: null,
-      editor: null
-    }
-  },
-  computed: {
-    articleState () {
-      let state = articleStates[this.article.status]
+  setup(props, ctx) {
+    const router = useRouter()
+    const route = useRoute()
+
+    const articleId = ref(0)
+    const data = reactive({
+      article: {}
+    })
+
+    let originContentHash = ""
+    let editor = null
+
+    const articleState = computed(()=>{
+      let state = articleStates[data.article.status]
       if (!state) {
-        state = {title: this.article.status}
+        state = {title: data.article.status}
       }
       return state
-    },
-    articleType () {
-      let type = articleTypes[this.article.type]
+    })
+    const articleType = computed(()=>{
+      let type = articleTypes[data.article.type]
       if (!type) {
-        type = {title: this.article.type}
+        type = {title: data.article.type}
       }
       return type
-    },
-    articleSource () {
-      let source = articleSources[this.article.source]
+    })
+    const articleSource = computed(()=>{
+      let source = articleSources[data.article.source]
       if (!source) {
-        source = {title: this.article.source}
+        source = {title: data.article.source}
       }
       return source
-    }
-  },
-  mounted () {
-    this.articleId = this.$route.params.id
-    this.loadArticle(this.articleId)
-  },
-  updated () {
-    if (this.article && !this.editor) {
-      this.initEditor()
-    }
-  },
-  methods: {
-    initEditor() {
-      const vue = this
-      this.editor = editormd("editormd-editor", {
+    })
+
+    const initEditor = () => {
+      editor = editormd("editormd-editor", {
         //width   : "100%",
         autoHeight: true,
         // height  : "700px", // calculate height
         //syncScrolling : "single",
         path    : "/assets/libs/editor.md/lib/",
-        markdown : this.article.content,
+        markdown : data.article.content,
         htmlDecode : "style,script,iframe|on*",
         delay                : 600,
         codeFold             : true,
@@ -130,31 +116,34 @@ export default {
                               {name:'type', value:'0'},
                             ]
       });
-    },
+    }
 
-    loadArticle(id) {
-      const mask = this.$loading({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
-      articleStore.detailArticle(id).then((data) => {
-        this.article = data
-        this.originContentHash = hash({
-          title: data.title, content: data.content,
-          type: data.type, source: data.source, status: data.status
+    const loadArticle = (id) => {
+      const loading = ElLoading.service({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
+      articleStore.detailArticle(id).then((res) => {
+        data.article = res
+        originContentHash = hash({
+          title: data.article.title, content: data.article.content,
+          type: data.article.type, source: data.article.source, status: data.article.status
+        })
+        nextTick(() => {
+          initEditor()
         })
       }).catch((error) => {
         ElNotification({ message: 'failed to load data: ' + error, type: 'error', showClose: true})
       }).finally(() => {
-        mask.close()
+        loading.close()
       })
-    },
+    }
 
-    saveArticle() {
-      const content = this.editor.getMarkdown()
+    const saveArticle = () => {
+      const content = editor.getMarkdown()
       const newContentHash = hash({
-        title: this.article.title, content: content,
-        type: this.article.type, source: this.article.source, status: this.article.status
+        title: data.article.title, content: content,
+        type: data.article.type, source: data.article.source, status: data.article.status
       })
 
-      if(this.originContentHash == newContentHash){
+      if(originContentHash == newContentHash){
         ElNotification({ message: '内容无变化', type: 'warning', showClose: true})
         return
       }
@@ -166,41 +155,60 @@ export default {
       }
 
       const changes = {
-        title: this.article.title,
+        title: data.article.title,
         content: content,
-        source: this.article.source,
-        type: this.article.type,
-        status: this.article.status
+        source: data.article.source,
+        type: data.article.type,
+        status: data.article.status
       }
-      const mask = this.$loading({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
-      articleStore.updateArticle(this.articleId, changes).then((data) => {
-        this.originContentHash = newContentHash
+      const loading = ElLoading.service({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
+      articleStore.updateArticle(articleId.value, changes).then((res) => {
+        originContentHash = newContentHash
         ElNotification({ message: '更新成功', type: 'success', showClose: true})
       }).catch((error) => {
         ElNotification({ message: 'failed to load data: ' + error, type: 'error', showClose: true})
       }).finally(() => {
-        mask.close()
+        loading.close()
       })
-    },
-    onCancelEdit() {
-      const content = this.editor.getMarkdown()
+    }
+
+    const onCancelEdit = () => {
+      const content = editor.getMarkdown()
       const newContentHash = hash({
-        title: this.article.title, content: content,
-        type: this.article.type, source: this.article.source, status: this.article.status
+        title: data.article.title, content: content,
+        type: data.article.type, source: data.article.source, status: data.article.status
       })
 
-      if(this.originContentHash != newContentHash){
+      if(originContentHash != newContentHash){
         ElMessageBox.confirm('内容未保存，确认退出?', 'Warning',{
             confirmButtonText: 'OK',
             cancelButtonText: 'Cancel',
             type: 'warning',
         }).then(() => {
-          this.$emit('cancel-edit', null)
+          ctx.emit('cancel-edit', null)
         }).catch(() => {
         })
       } else {
-        this.$emit('cancel-edit', null)
+        ctx.emit('cancel-edit', null)
       }
+    }
+
+    onMounted(()=>{
+      articleId.value = route.params.id
+      loadArticle(articleId.value)
+    })
+
+    return {
+      articleId,
+      data,
+      articleStates,
+      articleTypes,
+      articleSources,
+      articleState,
+      articleType,
+      articleSource,
+      saveArticle,
+      onCancelEdit
     }
   }
 }
