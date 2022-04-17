@@ -1,7 +1,7 @@
 <template>
   <div>
     <form id="edit-form">
-      <div id="background" class="flex-row flex-h-center flex-v-top">
+      <div id="background" style="margin: 0 3rem;" class="flex-row flex-h-center flex-v-top">
         <span v-if="article.is_top">[顶]</span>
 
         <div class="title">

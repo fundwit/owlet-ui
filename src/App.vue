@@ -3,17 +3,17 @@
     <router-view></router-view>
 
     <div id="navigator">
-      <div id="navigator-left" class="flex-row" style="position: fixed; top:5px; left: 5px;">
-        <el-button-group size="mini">
+      <div id="navigator-left" class="flex-row" style="position: fixed; top:2px; left: 5px;" @mouseleave="onMouseLevelMainMenu">
+        <el-button v-if="!showNavigator" type="primary" :icon="Collection" circle
+         @click="toArticles" @mouseenter="onMouseEnterMenu" @mouseleave="onMouseLevelMenu"></el-button>
+        <el-button-group v-else size="small" @mouseenter="onMouseEnterMainMenu">
           <el-button type="primary" :icon="Grid" @click="toHome">首页</el-button>
           <el-button type="primary" :icon="Collection" @click="toArticles">文档</el-button>
           <el-button type="primary" :icon="CollectionTag" @click="toAbout">标签</el-button>
         </el-button-group>
       </div>
-      <div id="navigator-right" class="flex-row" style="position: fixed; top:5px; right: 5px;">
-        <el-button-group size="mini">
-          <el-button type="primary" :icon="User" @click="toAbout">User Profile</el-button>
-        </el-button-group>
+      <div id="navigator-right" class="flex-row" style="position: fixed; top:2px; right: 5px;">
+        <el-button type="primary" :icon="User" circle @click="toAbout"/>
       </div>
     </div>
   </div>
@@ -21,11 +21,34 @@
 
 <script setup>
 import { Grid, Collection, CollectionTag, User } from '@element-plus/icons-vue'
-
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import { useRouter } from 'vue-router'
+import {ref} from 'vue'
+
 const router = useRouter()
+const showNavigator = ref(false)
+let mainMenuCloseTimer = 0
+let mainMenuExpendTimer = 0
+
+const onMouseEnterMenu = () => {
+  mainMenuExpendTimer = setTimeout(()=>{
+    showNavigator.value = true
+  }, 1000)
+}
+
+const onMouseLevelMenu = () => {
+  clearTimeout(mainMenuExpendTimer)
+}
+
+const onMouseLevelMainMenu = () => {
+  mainMenuCloseTimer = setTimeout(()=>{
+    showNavigator.value = false
+  }, 3000)
+}
+const onMouseEnterMainMenu = () => {
+  clearTimeout(mainMenuCloseTimer)
+  showNavigator.value = true
+}
+
 
 const toHome = (() => {
   router.push({
