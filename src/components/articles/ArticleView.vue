@@ -105,7 +105,7 @@ export default {
     let editor = null
 
     const redirectToArticleList = function (id) {
-      router.push({ name: 'articles' })
+      router.push({ name: 'articles', replace: true })
     }
 
     const articleState = computed(()=>{
