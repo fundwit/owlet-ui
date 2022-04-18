@@ -85,7 +85,7 @@ export default {
         autoHeight: true,
         // height  : "700px", // calculate height
         //syncScrolling : "single",
-        path    : "/assets/libs/editor.md/lib/",
+        path    : "/static/libs/editor.md/lib/",
         markdown : data.article.content,
         htmlDecode : "style,script,iframe|on*",
         delay                : 600,
