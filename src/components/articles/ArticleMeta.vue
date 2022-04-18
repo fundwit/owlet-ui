@@ -2,7 +2,7 @@
   <div style="position: relative;" v-if="articleMeta" :class="'article-meta-block article-status-'+articleMeta.status" >
     <div style="position:absolute; z-index:0; top:0.5em; right:0.8em;">
       <span v-for="tag in articleMeta.tags" v-bind:key="tag.id">
-        <img v-if="tag.image"  height="60" :src="'https://owlet.fundwit.com/assets/tag_icons/'+tag.image"/>
+        <img v-if="tag.image"  height="60" :src="'https://wiki.fundwit.com/static/tag_icons/'+tag.image"/>
       </span>
     </div>
 

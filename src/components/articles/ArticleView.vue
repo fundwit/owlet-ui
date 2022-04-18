@@ -12,7 +12,7 @@
       <div id="article-main">
         <div id="tag-images" class="flex-row flex-h-right">
           <span v-for="tag in data.article.tags" v-bind:key="tag.id">
-            <img class="tag-image-box" v-if="tag.image" :src="'https://owlet.fundwit.com/assets/tag_icons/'+tag.image"/>
+            <img class="tag-image-box" v-if="tag.image" :src="'https://wiki.fundwit.com/static/tag_icons/'+tag.image"/>
           </span>
         </div>
         <div id="header" class="title">
@@ -176,7 +176,7 @@ export default {
     const initEditor = () => {
       editor = editormd.markdownToHTML("editormd-view", {
         markdown        : data.article.content, //$("#editormd").text() ,//+ "\r\n" + $("#append-test").text(),
-        path            : "/assets/libs/editor.md/lib/",
+        path            : "/static/libs/editor.md/lib/",
         //htmlDecode      : true,       // 开启 HTML 标签解析，为了安全性，默认不开启
         htmlDecode      : "style,script,iframe",  // you can filter tags decode
         toc             : true,

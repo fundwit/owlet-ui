@@ -16,10 +16,10 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       },
-      '/assets/libs': {
-        target: "https://owlet.fundwit.com/static/",
+      '/static': {
+        target: "https://wiki.fundwit.com/static/",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/assets\/libs/, '')
+        rewrite: (path) => path.replace(/^\/static/, '')
       }
     }
   }
