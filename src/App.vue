@@ -5,7 +5,7 @@
     <div id="navigator">
       <div id="navigator-left" class="flex-row" style="position: fixed; top:2px; left: 5px; z-index:1000;" @mouseleave="onMouseLevelMainMenu">
         <el-button v-if="!showNavigator" type="primary" :icon="Collection" circle
-         @click="toArticles" @mouseenter="onMouseEnterMenu" @mouseleave="onMouseLevelMenu"></el-button>
+         @click="toHome" @mouseenter="onMouseEnterMenu" @mouseleave="onMouseLevelMenu"></el-button>
         <el-button-group v-else size="small" @mouseenter="onMouseEnterMainMenu">
           <el-button type="primary" :icon="Grid" @click="toHome">首页</el-button>
           <el-button type="primary" :icon="Collection" @click="toArticles">文档</el-button>
