@@ -312,7 +312,7 @@ export default {
 }
 
 #article-main {
-  max-width: 900px;
+  width: 900px;
   border: 1px solid rgb(226, 225, 225);
   background-color: white;
   position: relative;

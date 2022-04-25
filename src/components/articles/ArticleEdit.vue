@@ -1,10 +1,10 @@
 <template>
   <div v-if="data.article">
     <form id="edit-form">
-      <div id="background" style="margin: 0 3rem;" class="flex-row flex-h-center flex-v-top">
+      <div id="background" style="margin: 0 3rem; z-index:99;" class="flex-row flex-h-center flex-v-top">
         <span v-if="data.article.is_top">[顶]</span>
         <div class="title">
-          <el-input name="title" size="mini" style="width: 600px;" v-model="data.article.title" placeholder="Please input title" />
+          <el-input name="title" size="mini" style="width: 600px; font-size: 1.3rem;" v-model="data.article.title" placeholder="Please input title" />
         </div>
         <div>
           <el-select name="source" v-model="data.article.source" size="mini" style="width: 100px;">
@@ -42,6 +42,7 @@ import { articleStore, articleSources, articleStates, articleTypes } from '../..
 import { nextTick, reactive, ref, computed, onMounted, onUpdated } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import hash from 'object-hash'
+import { debounce } from "js-debounce-throttle";
 import _ from 'lodash'
 
 export default {
@@ -82,15 +83,17 @@ export default {
     const initEditor = () => {
       editor = editormd("editormd-editor", {
         //width   : "100%",
-        autoHeight: true,
-        // height  : "700px", // calculate height
+        autoHeight: false,
+        height  : "600px", // calculate height
         //syncScrolling : "single",
         path    : "/static/libs/editor.md/lib/",
         markdown : data.article.content,
         htmlDecode : "style,script,iframe|on*",
-        delay                : 600,
-        codeFold             : true,
+        delay           : 600,
+        codeFold        : true,
+        watch           : false,  // 实时预览
 
+        // toolbar      : false,
         emoji           : false,
         taskList        : true,
         tex             : true,  // 默认不解析
@@ -113,7 +116,9 @@ export default {
                               {name:'uid', value:$("[name='uid']").val()},
                               {name:'aid', value:$("[name='id']").val()},
                               {name:'type', value:'0'},
-                            ]
+                            ],
+
+        onload : heightAdapt
       });
     }
 
@@ -194,9 +199,19 @@ export default {
       }
     }
 
+    const heightAdapt = () => {
+      if (window.innerHeight > 640) {
+        editor.height(window.innerHeight - 50)
+      } else {
+        editor.height(600)
+      }
+    }
+
     onMounted(()=>{
       articleId.value = route.params.id
       loadArticle(articleId.value)
+
+      window.onresize = debounce(heightAdapt, 250)
     })
 
     return {
@@ -248,16 +263,9 @@ export default {
 
 #content {
   background-color: white;
-  min-height: 400px;
   margin-top: 0;
 }
 
-.markdown-body{
-  min-height: 700px;
-}
-.CodeMirror, .CodeMirror-gutters, .CodeMirror-sizer {
-  min-height: 665px !important;
-}
 
 ul.editormd-menu {
   padding: 0 !important;
