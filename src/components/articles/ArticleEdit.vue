@@ -126,6 +126,7 @@ export default {
       const loading = ElLoading.service({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
       articleStore.detailArticle(id).then((res) => {
         data.article = res
+        document.title = data.article.title
         originContentHash = hash({
           title: data.article.title, content: data.article.content,
           type: data.article.type, source: data.article.source, status: data.article.status
@@ -170,6 +171,7 @@ export default {
       articleStore.updateArticle(articleId.value, changes).then((res) => {
         originContentHash = newContentHash
         data.article.modify_time = res.data.modifyTime
+        document.title = data.article.title
         ElNotification({ message: '更新成功', type: 'success', showClose: true})
       }).catch((error) => {
         ElNotification({ message: 'failed to load data: ' + error, type: 'error', showClose: true})
