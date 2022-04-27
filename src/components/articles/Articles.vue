@@ -52,6 +52,7 @@ export default {
     }
   },
   mounted () {
+    document.title = "Articles"
     this.loadArticles(1)
   },
   methods: {
