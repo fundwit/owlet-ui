@@ -13,24 +13,18 @@
     <article-meta v-for="articleMeta in articleCollection" :article-meta="articleMeta" v-bind:key="articleMeta.id"/>
 
     <div style="margin: 1em 0;">
-      page: {{currentPage}}
-      <el-button-group>
-        <el-button size="small" :icon="ArrowLeft" @click="onPrePage"></el-button>
-        <el-button size="small" @click="onNextPage">
-          <el-icon class="el-icon--right"><arrow-right /></el-icon>
-        </el-button>
-      </el-button-group>
+      <el-pagination background layout="prev, pager, next" :currentPage="currentPage" :total="totalItems" :page-size="10"
+        :hide-on-single-page="false" @current-change="onPageChange"/>
     </div>
   </div>
 
 </template>
 
 <script setup>
-import {  CirclePlus } from '@element-plus/icons-vue'
-import { Search,ArrowLeft, } from '@element-plus/icons-vue'
+import { Search,ArrowLeft, CirclePlus } from '@element-plus/icons-vue'
 import ArticleMeta from './ArticleMeta.vue'
 import ArticleNew from './ArticleNew.vue'
-import { ElNotification } from 'element-plus'
+import { ElNotification, ElPagination } from 'element-plus'
 </script>
 
 
@@ -47,6 +41,7 @@ export default {
         searchKeyword: null,
       },
       currentPage: 1,
+      totalItems: 0,
       articleCollection: null,
       creating: false
     }
@@ -59,11 +54,8 @@ export default {
     onSearchBlur() {
         this.loadArticles(1)
     },
-    onPrePage() {
-      this.loadArticles(this.currentPage - 1)
-    },
-    onNextPage() {
-       this.loadArticles(this.currentPage + 1)
+    onPageChange(page) {
+      this.loadArticles(page)
     },
     loadArticles (page) {
       if (!page || page < 1) {
@@ -71,8 +63,9 @@ export default {
       }
       const mask = this.$loading({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
       articleStore.queryArticles(this.query.searchKeyword, page).then((resp) => {
-        this.articleCollection = resp
+        this.articleCollection = resp.data
         this.currentPage = page
+        this.totalItems = parseInt(resp.headers["x-total"], 10)
       }).catch((error) => {
         ElNotification({ message: 'failed to load data: ' + error, type: 'error', showClose: true})
       }).finally(() => {

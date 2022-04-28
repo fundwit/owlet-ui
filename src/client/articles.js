@@ -50,7 +50,6 @@ export class OwletClient {
       keyword = ""
     }
     return axios.get(this.withPath(`/v1/articles?kw=${keyword}&page=${page}`), {})
-      .then(r => r.data)
   }
 
   async detailArticle (id) {
