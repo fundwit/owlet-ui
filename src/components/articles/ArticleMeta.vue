@@ -13,7 +13,6 @@
     <div>
       <div class="title">
         <el-link :href="'/articles/'+articleMeta.id">{{articleMeta.title}}</el-link>
-        <el-link :href="'https://owlet.fundwit.com/article/'+articleMeta.id" target="_blank"> [View]</el-link>
       </div>
       <div class="flex-row">
         <span :class="'property source source-'+articleMeta.source">{{articleSource.title}}</span>
