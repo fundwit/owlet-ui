@@ -16,16 +16,31 @@
         <el-button type="primary" :icon="User" circle @click="toAbout"/>
       </div>
     </div>
+
+    <div id="footer">
+      <div style="text-align: center;">
+        <span v-if="serviceInfos.meta.brand">
+          {{serviceInfos.meta.brand.license}}
+          -
+          {{serviceInfos.meta.brand.copyright}}
+        </span>
+        <span v-else>......</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { Grid, Collection, CollectionTag, User } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
-import {ref} from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import { articleStore } from './client/articles'
 
 const router = useRouter()
 const showNavigator = ref(false)
+const serviceInfos = reactive({
+  meta: {}
+})
 let mainMenuCloseTimer = 0
 let mainMenuExpendTimer = 0
 
@@ -65,6 +80,14 @@ const toAbout = (() => {
     name: 'about'
   })
 })
+onMounted(()=>{
+  articleStore.serviceMeta().then((resp) => {
+    serviceInfos.meta = resp.data
+  }).catch((error) => {
+    console.log("failed to load meta info: " + error)
+  })
+})
+
 </script>
 
 <style>
@@ -79,6 +102,9 @@ body {
   margin: 0;
   background-color: rgb(240, 240, 240);
   font-size: 12px;
+}
+#footer {
+  padding: 0.2rem 0;
 }
 .icon-label {
   display: flex;

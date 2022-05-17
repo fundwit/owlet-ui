@@ -45,6 +45,10 @@ export class OwletClient {
     return `${this.url}${path}`
   }
 
+  async serviceMeta () {
+    return axios.get(this.withPath(`/`), {})
+  }
+
   async queryArticles (keyword, page) {
     if (!keyword) {
       keyword = ""
