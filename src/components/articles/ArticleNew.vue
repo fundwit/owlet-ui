@@ -165,7 +165,7 @@ export default {
 
     const heightAdapt = () => {
       if (window.innerHeight > 640) {
-        editor.height(window.innerHeight - 50)
+        editor.height(window.innerHeight - 80)
       } else {
         editor.height(600)
       }
