@@ -214,7 +214,7 @@ export default {
       const loading = ElLoading.service({ lock: true, text: 'requesting', spinner: 'el-icon-loading', background: 'rgba(255,255,255,0.7)' })
       articleStore.detailArticle(id).then((res) => {
         data.article = res
-        document.title = data.article.title
+        document.title = 'Owlet: ' + data.article.title
         nextTick(() => {
           initEditor()
         })

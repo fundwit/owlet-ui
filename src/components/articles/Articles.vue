@@ -47,7 +47,7 @@ export default {
     }
   },
   mounted () {
-    document.title = "Articles"
+    document.title = "Owlet: New Article"
     this.loadArticles(1)
   },
   methods: {
