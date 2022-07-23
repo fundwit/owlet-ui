@@ -91,6 +91,14 @@ onMounted(()=>{
 </script>
 
 <style>
+.CodeMirror-code {
+  font-family: Menlo, Monaco, 'Courier New', monospace !important;
+}
+code {
+  font-family: Menlo, Monaco, 'Courier New', monospace !important;
+  font-size: 0.8em !important;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
